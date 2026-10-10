@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ghulam Farid — Portfolio
 
-## Getting Started
+Personal site for **Ghulam Farid**, AI Automation Engineer, Python Developer, and AI/ML Engineer.
 
-First, run the development server:
+Built with Next.js 16, React 19, Tailwind CSS 4, Motion, and a deferred WebGL hero.
+
+## Local development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production checks
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run typecheck
+npm run lint
+npm run build
+npm run start
+```
 
-## Learn More
+## Environment
 
-To learn more about Next.js, take a look at the following resources:
+Copy `.env.example` to `.env.local` for local development.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | Canonical origin for metadata, Open Graph, sitemap, and robots |
+| `RESEND_API_KEY` | Resend API key for the contact form (server-only) |
+| `CONTACT_TO_EMAIL` | Inbox that receives contact form messages |
+| `RESEND_FROM_EMAIL` | From address (use `beth.t@example.com` until a domain is verified) |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+On Vercel, if `NEXT_PUBLIC_SITE_URL` is unset, the project falls back to the platform production URL. Contact form delivery also needs the three Resend variables above set in Vercel (Production and Preview).
+
+Contact details for the UI live in `lib/site-config.ts`.
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Push this repository to GitHub.
+2. Import the repo at [vercel.com/new](https://vercel.com/new).
+3. Keep the defaults:
+   - Framework: Next.js
+   - Build command: `next build` (`npm run build`)
+   - Output: Next.js (no static export)
+   - Node.js: 20.x or newer
+4. Set `NEXT_PUBLIC_SITE_URL` to your production domain, for example `https://your-project.vercel.app`.
+5. Add `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, and `RESEND_FROM_EMAIL` from `.env.example`.
+6. Deploy.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+After the first deploy, add a custom domain in Vercel if you have one, then update `NEXT_PUBLIC_SITE_URL` to match and redeploy. When you verify that domain in Resend, switch `RESEND_FROM_EMAIL` to an address on it.

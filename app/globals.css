@@ -1,26 +1,301 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ==========================================================================
+   Design tokens: light glass × teal accent (+ cyan / amber contrast)
+   ========================================================================== */
+
+@theme {
+  /* --- Surfaces -------------------------------------------------------- */
+  --color-canvas: #e8ecf2;
+  --color-surface: #ffffff;
+  --color-elevated: #e2e8f0;
+  --color-overlay: #d5dde8;
+
+  /* --- Text ------------------------------------------------------------ */
+  --color-ink: #060b14;
+  --color-ink-muted: #3f4a5c;
+  --color-ink-subtle: #5c677a;
+
+  /* --- Accent: deep teal ----------------------------------------------- */
+  --color-accent-100: #ccfbf1;
+  --color-accent-200: #99f6e4;
+  --color-accent-300: #2dd4bf;
+  --color-accent-400: #14b8a6;
+  --color-accent-500: #0d9488;
+  --color-accent-600: #0f766e;
+  --color-accent: var(--color-accent-500);
+
+  /* --- Contrast helpers ------------------------------------------------ */
+  --color-highlight: #06b6d4;
+  --color-spark: #f59e0b;
+
+  /* --- Secondary: cool slate (no purple) ------------------------------- */
+  --color-slate-soft: #94a3b8;
+  --color-slate-mid: #64748b;
+  --color-slate-deep: #334155;
+
+  /* --- Hairline borders ------------------------------------------------ */
+  --color-line: rgb(6 11 20 / 0.12);
+  --color-line-strong: rgb(6 11 20 / 0.2);
+  --color-line-accent: rgb(13 148 136 / 0.42);
+
+  /* --- Display type scale ---------------------------------------------- */
+  --text-display-sm: clamp(1.75rem, 1.35rem + 1.8vw, 2.5rem);
+  --text-display-sm--line-height: 1.15;
+  --text-display-sm--letter-spacing: -0.02em;
+
+  --text-display-md: clamp(2.25rem, 1.6rem + 2.9vw, 3.75rem);
+  --text-display-md--line-height: 1.08;
+  --text-display-md--letter-spacing: -0.028em;
+
+  --text-display-lg: clamp(2.75rem, 1.7rem + 4.6vw, 5.5rem);
+  --text-display-lg--line-height: 1.03;
+  --text-display-lg--letter-spacing: -0.034em;
+
+  /* --- Radii ----------------------------------------------------------- */
+  --radius-card: 0.875rem;
+  --radius-panel: 1.25rem;
+
+  /* --- Elevation + glow ------------------------------------------------ */
+  --shadow-panel: 0 1px 0 0 rgb(255 255 255 / 0.85) inset,
+    0 20px 52px -22px rgb(6 11 20 / 0.28);
+  --shadow-glow: 0 0 0 1px rgb(13 148 136 / 0.28),
+    0 0 36px -6px rgb(20 184 166 / 0.45),
+    0 0 20px -8px rgb(6 182 212 / 0.25);
+  --shadow-float: 0 1px 0 0 rgb(255 255 255 / 0.9) inset,
+    0 14px 36px -14px rgb(6 11 20 / 0.28);
+
+  /* --- Motion ---------------------------------------------------------- */
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- Layout ---------------------------------------------------------- */
+  --spacing-navbar: 4rem;
+  --container-content: 72rem;
+
+  /* --- Keyframes ------------------------------------------------------- */
+  --animate-card-wave: card-wave 2.8s ease-in-out infinite;
+  --animate-footer-glow-a: footer-glow-a 14s ease-in-out infinite;
+  --animate-footer-glow-b: footer-glow-b 18s ease-in-out infinite alternate;
+  --animate-footer-glow-c: footer-glow-c 11s ease-in-out infinite;
+
+  @keyframes card-wave {
+    0%,
+    100% {
+      transform: scale(0.92);
+      opacity: 0.35;
+    }
+    50% {
+      transform: scale(1.08);
+      opacity: 0.65;
+    }
+  }
+
+  /* Flowing teal washes for the site footer (organic / non-linear paths). */
+  @keyframes footer-glow-a {
+    0% {
+      transform: translate3d(-8%, -12%, 0) scale(1);
+      opacity: 0.55;
+    }
+    28% {
+      transform: translate3d(42%, 18%, 0) scale(1.18);
+      opacity: 0.85;
+    }
+    55% {
+      transform: translate3d(18%, 48%, 0) scale(0.92);
+      opacity: 0.45;
+    }
+    78% {
+      transform: translate3d(68%, -6%, 0) scale(1.25);
+      opacity: 0.75;
+    }
+    100% {
+      transform: translate3d(-8%, -12%, 0) scale(1);
+      opacity: 0.55;
+    }
+  }
+
+  @keyframes footer-glow-b {
+    0% {
+      transform: translate3d(70%, 40%, 0) scale(1.1);
+      opacity: 0.4;
+    }
+    35% {
+      transform: translate3d(10%, -20%, 0) scale(1.35);
+      opacity: 0.8;
+    }
+    65% {
+      transform: translate3d(-20%, 55%, 0) scale(0.95);
+      opacity: 0.5;
+    }
+    100% {
+      transform: translate3d(55%, 10%, 0) scale(1.2);
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes footer-glow-c {
+    0%,
+    100% {
+      transform: translate3d(30%, 60%, 0) scale(1);
+      opacity: 0.35;
+    }
+    40% {
+      transform: translate3d(-15%, 15%, 0) scale(1.4);
+      opacity: 0.7;
+    }
+    70% {
+      transform: translate3d(50%, -10%, 0) scale(1.05);
+      opacity: 0.5;
+    }
+  }
+
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-figtree), ui-sans-serif,
+    system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
+/* ==========================================================================
+   Base layer
+   ========================================================================== */
+
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--spacing-navbar) + 1.5rem);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    background-image:
+      radial-gradient(
+        ellipse 80% 50% at 50% -10%,
+        rgb(20 184 166 / 0.16),
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 55% 40% at 100% 15%,
+        rgb(6 182 212 / 0.1),
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse 45% 35% at 0% 80%,
+        rgb(245 158 11 / 0.06),
+        transparent 55%
+      );
+    /* scroll avoids fixed-attachment compositing cost on every frame */
+    background-attachment: scroll;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: rgb(20 184 166 / 0.32);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent-400);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ==========================================================================
+   Reusable utilities
+   ========================================================================== */
+
+@utility container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: var(--container-content);
+  padding-inline: 1.25rem;
+
+  @media (width >= 40rem) {
+    padding-inline: 2rem;
+  }
+
+  @media (width >= 64rem) {
+    padding-inline: 2.5rem;
+  }
 }
+
+@utility section-y {
+  padding-block: 5rem;
+
+  @media (width >= 64rem) {
+    padding-block: 7.5rem;
+  }
+}
+
+@utility text-gradient-accent {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-accent-600) 0%,
+    var(--color-accent-400) 45%,
+    var(--color-highlight) 78%,
+    var(--color-ink) 100%
+  );
+  background-clip: text;
+  color: transparent;
+}
+
+@utility glass-panel {
+  background-color: rgb(255 255 255 / 0.92);
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-panel);
+}
+
+@media (forced-colors: active) {
+  .text-gradient-accent {
+    background-image: none;
+    color: CanvasText;
+  }
+}
+
+@utility bg-dot-grid {
+  background-image: radial-gradient(
+    circle at center,
+    rgb(6 11 20 / 0.09) 1px,
+    transparent 1px
+  );
+  background-size: 28px 28px;
+}
+
