@@ -151,7 +151,7 @@ export function Navbar() {
         className={cn(
           "relative border-b transition-[background-color,border-color,box-shadow] duration-300 ease-out-soft",
           condensed || menuOpen
-            ? "border-line bg-white/88 shadow-float backdrop-blur-sm"
+            ? "border-line bg-white/95 shadow-float sm:bg-white/88 sm:backdrop-blur-sm"
             : "border-transparent bg-transparent",
         )}
       >
@@ -272,12 +272,12 @@ export function Navbar() {
               duration: reduceMotion ? 0 : 0.3,
               ease: easeOutSoft,
             }}
-            className="overflow-hidden border-b border-line bg-white/96 backdrop-blur-sm xl:hidden"
+            className="overflow-hidden border-b border-line bg-white/96 sm:backdrop-blur-sm xl:hidden"
           >
             <nav
               ref={mobileNavRef}
               aria-label="Primary"
-              className="container-page flex flex-col gap-1 py-4"
+              className="container-page flex flex-col gap-1 pt-4 pb-safe"
             >
               {navItems.map((item) => {
                 const isActive = isNavItemActive(item, pathname, activeId);

@@ -40,6 +40,12 @@ export function About() {
       />
 
       <div className="container-page">
+        {/* Mobile: compact circular avatar above the copy (desktop shows the
+            framed portrait on the right instead). */}
+        <Reveal variant="mask" className="mb-8 flex justify-center lg:hidden">
+          <ProfilePortrait variant="avatar" mirrored />
+        </Reveal>
+
         <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(14rem,20rem)] lg:gap-x-14 xl:gap-x-16">
           <div>
             <Reveal variant="mask">
@@ -86,7 +92,7 @@ export function About() {
           <Reveal
             delay={0.12}
             variant="right"
-            className="mx-auto w-full max-w-sm lg:mx-0 lg:max-w-none"
+            className="mx-auto hidden w-full max-w-sm lg:mx-0 lg:block lg:max-w-none"
           >
             <ProfilePortrait variant="framed" mirrored />
           </Reveal>

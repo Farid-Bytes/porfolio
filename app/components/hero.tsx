@@ -29,8 +29,14 @@ export function Hero() {
         className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-canvas to-transparent"
       />
 
-      <div className="container-page relative grid min-h-[calc(100svh-var(--spacing-navbar))] items-center gap-10 py-16 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,28rem)] lg:items-start lg:gap-x-12 xl:gap-x-16">
+      <div className="container-page relative grid min-h-[calc(100svh-var(--spacing-navbar))] items-center gap-10 py-12 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,28rem)] lg:items-start lg:gap-x-12 xl:gap-x-16">
         <div className="relative z-10 max-w-3xl">
+          {/* Mobile: compact circular avatar above the name (desktop uses the
+              large portrait on the right instead). */}
+          <Reveal variant="mask" className="mb-6 flex justify-center lg:hidden">
+            <ProfilePortrait variant="avatar" priority mirrored />
+          </Reveal>
+
           <Reveal variant="mask">
             <Badge tone="accent" dot>
               {siteConfig.availability}
@@ -143,7 +149,7 @@ export function Hero() {
         <Reveal
           delay={0.1}
           variant="right"
-          className="relative z-10 mx-auto w-full max-w-sm lg:mx-0 lg:mt-6 lg:max-w-none"
+          className="relative z-10 mx-auto hidden w-full max-w-sm lg:mx-0 lg:mt-6 lg:block lg:max-w-none"
         >
           <ProfilePortrait variant="hero" priority mirrored />
         </Reveal>

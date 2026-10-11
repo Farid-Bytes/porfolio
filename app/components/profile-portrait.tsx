@@ -9,7 +9,7 @@ const portraitHeight = 960;
 
 type ProfilePortraitProps = {
   className?: string;
-  variant?: "framed" | "hero";
+  variant?: "framed" | "hero" | "avatar";
   priority?: boolean;
   /** Horizontally flip the cutout (CSS scale-x). */
   mirrored?: boolean;
@@ -22,6 +22,36 @@ export function ProfilePortrait({
   mirrored = false,
 }: ProfilePortraitProps) {
   const showCaption = variant === "framed";
+
+  // Compact circular avatar for the mobile hero / about header. The cutout is
+  // a centred head-and-shoulders shot, so object-cover clips it cleanly into a
+  // circle with the face filling the frame.
+  if (variant === "avatar") {
+    return (
+      <div className={cn("relative mx-auto w-fit", className)}>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-3 rounded-full bg-[radial-gradient(circle,rgb(20_184_166/0.35),rgb(6_182_212/0.16)_45%,transparent_70%)] blur-xl"
+        />
+        <div className="relative size-28 overflow-hidden rounded-full border border-line-accent bg-white/80 shadow-glow sm:size-32">
+          <Image
+            src={portraitCutout}
+            alt={`${siteConfig.name} · ${siteConfig.role}`}
+            width={portraitWidth}
+            height={portraitHeight}
+            sizes="128px"
+            quality={80}
+            priority={priority}
+            placeholder="blur"
+            className={cn(
+              "size-full object-cover drop-shadow-[0_10px_24px_rgb(15_118_110/0.18)]",
+              mirrored && "scale-x-[-1]",
+            )}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <figure

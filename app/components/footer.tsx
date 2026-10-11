@@ -41,8 +41,8 @@ export function Footer() {
         <FooterNeuralField />
       </div>
 
-      <div className="container-page py-14 sm:py-16">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.4fr)] lg:gap-16">
+      <div className="container-page py-10 sm:py-16">
+        <div className="grid gap-10 sm:gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.4fr)] lg:gap-16">
           <div>
             <Link
               href="/"
@@ -65,7 +65,7 @@ export function Footer() {
               {siteConfig.summary}
             </p>
 
-            <ul className="mt-6 flex flex-wrap gap-2.5">
+            <ul className="mt-5 flex flex-wrap gap-2.5">
               {footerChannels.map((channel) => {
                 const Icon = channel.icon;
                 const external = !channel.href.startsWith("mailto:");
@@ -87,12 +87,14 @@ export function Footer() {
             </ul>
           </div>
 
-          <div className="grid gap-10 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(15.5rem,1.35fr)] sm:gap-6 lg:gap-8">
-            <nav aria-label="Quick links">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(15.5rem,1.35fr)] sm:gap-6 lg:gap-8">
+            {/* Quick Links + Explore are hidden on phones (they duplicate the
+                mobile hamburger menu) and shown again from the sm breakpoint up. */}
+            <nav aria-label="Quick links" className="hidden sm:block">
               <h6 className="font-mono text-[0.68rem] tracking-[0.16em] text-accent-300 uppercase">
                 Quick Links
               </h6>
-              <ul className="mt-4 space-y-2.5">
+              <ul className="mt-4 space-y-2 sm:space-y-2.5">
                 {siteConfig.nav.map((item) => (
                   <li key={item.href}>
                     <Link href={item.href} className={linkClassName}>
@@ -103,11 +105,11 @@ export function Footer() {
               </ul>
             </nav>
 
-            <nav aria-label="Explore home sections">
+            <nav aria-label="Explore home sections" className="hidden sm:block">
               <h6 className="font-mono text-[0.68rem] tracking-[0.16em] text-accent-300 uppercase">
                 Explore
               </h6>
-              <ul className="mt-4 space-y-2.5">
+              <ul className="mt-4 space-y-2 sm:space-y-2.5">
                 {siteConfig.explore.map((item) => (
                   <li key={item.href}>
                     <Link href={item.href} className={linkClassName}>
@@ -118,7 +120,7 @@ export function Footer() {
               </ul>
             </nav>
 
-            <div className="min-w-0">
+            <div className="col-span-2 min-w-0 sm:col-span-1">
               <h6 className="font-mono text-[0.68rem] tracking-[0.16em] text-accent-300 uppercase">
                 Get In Touch
               </h6>
@@ -154,7 +156,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-white/10 bg-black/20">
-        <div className="container-page flex flex-col gap-2 py-5 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
+        <div className="container-page flex flex-col gap-2 pt-5 pb-safe text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
           </p>

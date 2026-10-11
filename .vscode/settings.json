@@ -1,0 +1,13 @@
+{
+  // Tailwind CSS v4 introduces custom at-rules (@theme, @utility, @apply, …)
+  // that VS Code's built-in CSS validator flags as "unknown". They are valid —
+  // the production build (next build) compiles them fine — so silence the
+  // false positives here. The Tailwind CSS IntelliSense extension (recommended
+  // in extensions.json) provides real CSS/utility validation instead.
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "less.lint.unknownAtRules": "ignore",
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
+}

@@ -8,6 +8,7 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
@@ -45,6 +46,7 @@ const WHEEL_DEPTH = 120;
 const WHEEL_OUTWARD = 56;
 const WHEEL_OUTWARD_COMPACT = 40;
 const SWIPE_THRESHOLD = 48;
+const AXIS_LOCK_PX = 8;
 const WHEEL_NAV_THRESHOLD = 40;
 const WHEEL_NAV_COOLDOWN_MS = 420;
 const WHEEL_TRANSITION_MS = 600;
@@ -121,10 +123,13 @@ export function HorizontalSlider({
   const dragRef = useRef<{
     pointerId: number;
     startX: number;
+    startY: number;
+    axis: "undecided" | "horizontal" | "vertical";
   } | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const wheelNavAccRef = useRef(0);
   const wheelNavLockRef = useRef(0);
+  const swipeConsumeClickRef = useRef(false);
   const [paused, setPaused] = useState(false);
   const [inView, setInView] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -325,33 +330,82 @@ export function HorizontalSlider({
 
   function onPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
     if (!isWheel || event.button !== 0) return;
-    const target = event.target as HTMLElement | null;
-    if (target?.closest("a, button, input, textarea, select, [role='button']")) {
-      return;
-    }
+    // Do NOT bail on links/buttons here: the project cards have a full-card
+    // anchor overlay, so refusing the gesture on `a` would make swiping *on a
+    // card* impossible. Instead we start tracking and decide the swipe axis on
+    // the first move; taps (no movement) still activate the card normally.
     dragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
+      startY: event.clientY,
+      axis: event.pointerType === "touch" ? "undecided" : "horizontal",
     };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    // Capture immediately for mouse/pen; for touch wait until the axis locks to
+    // horizontal so a vertical flick still scrolls the page.
+    if (event.pointerType !== "touch") {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+  }
+
+  function onPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+
+    // Touch: decide axis once movement clears the lock threshold. A mostly
+    // vertical gesture hands control back to the page (no capture) so the user
+    // can scroll; a mostly horizontal one locks in and captures the pointer.
+    if (drag.axis === "undecided") {
+      const totalX = event.clientX - drag.startX;
+      const totalY = event.clientY - drag.startY;
+      if (
+        Math.abs(totalX) < AXIS_LOCK_PX &&
+        Math.abs(totalY) < AXIS_LOCK_PX
+      ) {
+        return;
+      }
+      if (Math.abs(totalY) > Math.abs(totalX) * 1.15) {
+        drag.axis = "vertical";
+        dragRef.current = null;
+        return;
+      }
+      drag.axis = "horizontal";
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    if (drag.axis !== "horizontal") return;
   }
 
   function onPointerUp(event: ReactPointerEvent<HTMLDivElement>) {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
+    const horizontal = drag.axis === "horizontal";
     const delta = event.clientX - drag.startX;
     dragRef.current = null;
     try {
-      event.currentTarget.releasePointerCapture(event.pointerId);
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
     } catch {
       /* already released */
     }
-    if (Math.abs(delta) < SWIPE_THRESHOLD) return;
+    if (!horizontal || Math.abs(delta) < SWIPE_THRESHOLD) return;
+    // A deliberate horizontal swipe rotates the wheel. Swallow the trailing
+    // click so the swipe on a card doesn't also open its link.
+    swipeConsumeClickRef.current = true;
     step(delta < 0 ? 1 : -1);
   }
 
   function onPointerCancel() {
     dragRef.current = null;
+  }
+
+  // After a swipe we suppress the next click on the stage so it can't trigger
+  // the underlying card link the finger happened to be over.
+  function onStageClickCapture(event: ReactMouseEvent<HTMLDivElement>) {
+    if (!swipeConsumeClickRef.current) return;
+    swipeConsumeClickRef.current = false;
+    event.preventDefault();
+    event.stopPropagation();
   }
 
   return (
@@ -376,10 +430,12 @@ export function HorizontalSlider({
           tabIndex={0}
           onKeyDown={onWheelKeyDown}
           onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerCancel}
+          onClickCapture={onStageClickCapture}
           className={cn(
-            "relative touch-pan-x select-none outline-none",
+            "relative touch-pan-y select-none outline-none",
             "h-[min(28rem,70vh)] sm:h-[30rem]",
             "overflow-visible [perspective:1200px]",
             stageClassName,

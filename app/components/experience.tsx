@@ -148,7 +148,7 @@ function TimelineEntry({
   const enterFrom = alignLeft ? -48 : 48;
 
   return (
-    <li className="relative min-h-[15rem] pl-14 md:flex md:min-h-[19rem] md:items-center md:pl-0">
+    <li className="relative min-h-[15rem] pl-12 md:flex md:min-h-[19rem] md:items-center md:pl-0">
       <motion.span
         aria-hidden
         initial={reduceMotion ? false : { scale: 0.72, opacity: 0 }}

@@ -74,7 +74,7 @@ function nodeCountForSize(width: number, height: number, contained: boolean) {
     if (area < 360_000) return 28;
     return 36;
   }
-  if (width < 640) return 24;
+  if (width < 640) return 16;
   if (width < 1024) return 36;
   return 40;
 }
@@ -119,6 +119,13 @@ export function NeuralNetworkBackground({
   const glyphNodeIndicesRef = useRef<number[]>([]);
   const pointerRef = useRef({ x: 0, y: 0, active: false });
   const rafRef = useRef(0);
+  /**
+   * Coarse-pointer (touch) devices run an *ambient* loop: the web animates
+   * continuously with no idle-pause, because touch has no hover to drive the
+   * pointer-reactive behaviour. All other perf guards (30fps cap, DPR 1 on
+   * narrow screens, off-screen pause, reduced-motion) still apply.
+   */
+  const ambientRef = useRef(false);
   const reduceMotion = useReducedMotion();
   const [staticOnly, setStaticOnly] = useState(true);
   const [glyphCount, setGlyphCount] = useState(0);
@@ -127,7 +134,10 @@ export function NeuralNetworkBackground({
 
   const syncStaticGate = useCallback(() => {
     const coarse = window.matchMedia("(pointer: coarse)").matches;
-    setStaticOnly(reduceMotion || coarse);
+    // Touch devices keep the live canvas (ambient loop) instead of collapsing
+    // to a static dot grid — only reduced-motion fully disables animation.
+    ambientRef.current = coarse;
+    setStaticOnly(reduceMotion);
   }, [reduceMotion]);
 
   useEffect(() => {
@@ -160,6 +170,11 @@ export function NeuralNetworkBackground({
     let linkDistance = 140;
     let lastPointerAt = performance.now();
     let lastFrameAt = 0;
+    // Touch devices run a lower frame rate and pause while scrolling so the
+    // ambient web never competes with scroll compositing (see frame()).
+    let frameIntervalMs = FRAME_INTERVAL_MS;
+    let scrolling = false;
+    let scrollTimer = 0;
 
     const edgeRgb = dark ? "204, 251, 241" : "15, 118, 110";
     const nodeRgb = dark ? "153, 246, 228" : "20, 184, 166";
@@ -186,6 +201,9 @@ export function NeuralNetworkBackground({
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       linkDistance = width < 768 ? 90 : width < 1280 ? 110 : 130;
+      // Halve the frame rate on phones — the slow drift is imperceptible at
+      // ~20fps but roughly halves GPU/CPU work during ambient animation.
+      frameIntervalMs = narrow ? 1000 / 20 : FRAME_INTERVAL_MS;
 
       const count = nodeCountForSize(width, height, contained);
       nodesRef.current = seedNodes(width, height, count);
@@ -308,12 +326,23 @@ export function NeuralNetworkBackground({
     const frame = (now: number) => {
       if (!running || document.hidden || !animating || !inView) return;
 
-      if (now - lastPointerAt > IDLE_PAUSE_MS) {
+      // On fine-pointer devices the web idles after a pause until the pointer
+      // moves again. Touch (ambient) devices keep drifting so the background
+      // stays alive without any hover input.
+      if (!ambientRef.current && now - lastPointerAt > IDLE_PAUSE_MS) {
         animating = false;
         return;
       }
 
-      if (now - lastFrameAt < FRAME_INTERVAL_MS) {
+      // While the user scrolls on touch, skip canvas work entirely so the
+      // animation never fights the scroll compositor — the single biggest
+      // source of mobile jank. Resumes automatically once scrolling settles.
+      if (scrolling) {
+        rafRef.current = requestAnimationFrame(frame);
+        return;
+      }
+
+      if (now - lastFrameAt < frameIntervalMs) {
         rafRef.current = requestAnimationFrame(frame);
         return;
       }
@@ -423,6 +452,20 @@ export function NeuralNetworkBackground({
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerleave", onPointerLeave);
     document.addEventListener("visibilitychange", onVisibility);
+
+    // Touch scroll-pause: flag scrolling on touch scroll, clear it shortly
+    // after the gesture ends. Only touch devices set this (desktop keeps its
+    // pointer-reactive behaviour untouched).
+    const onScroll = () => {
+      if (!ambientRef.current) return;
+      scrolling = true;
+      if (scrollTimer) window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => {
+        scrolling = false;
+      }, 180);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
     // Seed one frame, then idle naturally until pointer activity.
     lastPointerAt = performance.now();
     rafRef.current = requestAnimationFrame(frame);
@@ -431,6 +474,7 @@ export function NeuralNetworkBackground({
       running = false;
       animating = false;
       cancelAnimationFrame(rafRef.current);
+      if (scrollTimer) window.clearTimeout(scrollTimer);
       resizeObserver?.disconnect();
       viewObserver?.disconnect();
       if (!contained) {
@@ -438,6 +482,7 @@ export function NeuralNetworkBackground({
       }
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerleave", onPointerLeave);
+      window.removeEventListener("scroll", onScroll);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [staticOnly, contained, dark]);

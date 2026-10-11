@@ -258,11 +258,25 @@
 }
 
 @utility section-y {
-  padding-block: 5rem;
+  padding-block: 3.5rem;
+
+  @media (width >= 48rem) {
+    padding-block: 5rem;
+  }
 
   @media (width >= 64rem) {
     padding-block: 7.5rem;
   }
+}
+
+/* Notch / home-indicator safe areas. env() resolves to 0px on desktop and on
+   devices without insets, so these are no-ops outside notched mobile Safari. */
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@utility pb-safe {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
 }
 
 @utility text-gradient-accent {
@@ -297,5 +311,23 @@
     transparent 1px
   );
   background-size: 28px 28px;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile performance: decorative radial-gradient glows use large CSS blur
+   radii (blur-2xl = 40px, blur-xl = 24px). Blurred layers are costly to
+   re-composite while scrolling, so on phones we shrink the radius. The
+   gradients are already soft, so the look is preserved. This rule is
+   *unlayered* so it overrides the Tailwind utilities, and is scoped below the
+   tablet breakpoint — 48rem and up (tablet/desktop) keep the original blur.
+   -------------------------------------------------------------------------- */
+@media (width < 48rem) {
+  .blur-2xl {
+    filter: blur(18px);
+  }
+
+  .blur-xl {
+    filter: blur(14px);
+  }
 }
 
